@@ -39,6 +39,10 @@ class PasswordSetError(Exception):
     """Raised when the password can't be set.
     """
 
+class PasswordDeleteError(Exception):
+    """Raised when the password can't be deleted.
+    """
+
 class KeyringBackend(object):
     """The abstract base class of the keyring, every backend must implement
     this interface.
@@ -65,6 +69,13 @@ class KeyringBackend(object):
         """Set password for the username of the service
         """
         raise PasswordSetError("reason")
+
+    @abstractmethod
+    def delete_password(self, service, username):
+        """Delete the password for the username of the service.
+        """
+        raise PasswordDeleteError("reason")
+
 
 class _ExtensionKeyring(KeyringBackend):
     """_ExtensionKeyring is a adaptor class for the platform related keyring
@@ -111,7 +122,16 @@ class _ExtensionKeyring(KeyringBackend):
         try:
             self.keyring_impl.password_set(service, username, password)
         except OSError, e:
-            raise PasswordSetError(e.message)
+            raise PasswordSetError(e)
+
+    def delete_password(self, service, username):
+        """Override the delete_password in KeyringBackend.
+        """
+        try:
+            self.keyring_impl.password_delete(service, username)
+        except OSError, e:
+            raise PasswordDeleteError(e)
+
 
 class OSXKeychain(_ExtensionKeyring):
     """Mac OS X Keychain"""
@@ -172,6 +192,19 @@ class GnomeKeyring(KeyringBackend):
         except gnomekeyring.CancelledError:
             # The user pressed "Cancel" when prompted to unlock their keyring.
             raise PasswordSetError("cancelled by user")
+
+    def delete_password(self, service, username):
+        """Delete the password for the username of the service.
+        """
+        try:
+            items = gnomekeyring.find_network_password_sync(username, service)
+            for current in items:
+                gnomekeyring.item_delete_sync(current['keyring'],
+                                              current['item_id'])
+        except gnomekeyring.NoMatchError:
+            raise PasswordDeleteError("can't found the password")
+        except gnomekeyring.CancelledError:
+            raise PasswordDeleteError("cancelled by user")
 
 kwallet = None
 
@@ -250,6 +283,15 @@ class KDEKWallet(KeyringBackend):
         wallet = open_kwallet()
         wallet.writePassword(username+'@'+service, password)
 
+    def delete_password(self, service, username):
+        """Delete the password for the username of the service.
+        """
+        key = username + '@' + service
+        if kwallet.keyDoesNotExist(kwallet.walletName(), 'Python', key):
+            raise PasswordDeleteError("can't found the password")
+        kwallet.removeEntry(key)
+
+
 class BasicFileKeyring(KeyringBackend):
     """BasicFileKeyring is a file-based implementation of keyring.
 
@@ -326,6 +368,20 @@ class BasicFileKeyring(KeyringBackend):
         config.set(service, username, password_base64)
         config_file = open(self.file_path,'w')
         config.write(config_file)
+
+    def delete_password(self, service, username):
+        """Delete the password for the username of the service.
+        """
+        service = escape_for_ini(service)
+        config = ConfigParser.RawConfigParser()
+        if os.path.exists(self.file_path):
+            config.read(self.file_path)
+        if not config.remove_section(service):
+            raise PasswordDeleteError("can't found the password")
+        # update the file
+        config_file = open(self.file_path,'w')
+        config.write(config_file)
+
 
 class UncryptedFileKeyring(BasicFileKeyring):
     """Uncrypted File Keyring"""
@@ -582,6 +638,8 @@ class WinVaultKeyring(KeyringBackend):
         self.win32cred.CredWrite(credential, 0)
 
     def delete_password(self, service, username):
+        """Delete the password for the username of the service.
+        """
         compound = self._compound_name(username, service)
         for target in service, compound:
             existing_pw = self._get_password(target)
@@ -589,10 +647,12 @@ class WinVaultKeyring(KeyringBackend):
                 self._delete_password(target)
 
     def _delete_password(self, target):
+        """Call win32 api to delete the password."""
         self.win32cred.CredDelete(
             Type=self.win32cred.CRED_TYPE_GENERIC,
             TargetName=target,
         )
+
 
 class Win32CryptoRegistry(KeyringBackend):
     """Win32CryptoRegistry is a keyring which use Windows CryptAPI to encrypt
@@ -652,6 +712,20 @@ class Win32CryptoRegistry(KeyringBackend):
         from _winreg import HKEY_CURRENT_USER, CreateKey, SetValueEx, REG_SZ
         hkey = CreateKey(HKEY_CURRENT_USER, r'Software\%s\Keyring' % service)
         SetValueEx(hkey, username, 0, REG_SZ, password_base64)
+
+
+    def delete_password(self, service, username):
+        """Delete the password for the username of the service.
+        """
+        from _winreg import (KEY_ALL_ACCESS, HKEY_CURRENT_USER, DeleteValue,
+                             OpenKey)
+        try:
+            key = r'Software\%s\Keyring' % service
+            hkey = OpenKey(HKEY_CURRENT_USER, key, 0, KEY_ALL_ACCESS)
+            DeleteValue(hkey, username)
+        except WindowsError, e:
+            raise PasswordDeleteError(e)
+
 
 def select_windows_backend():
     if os.name != 'nt':

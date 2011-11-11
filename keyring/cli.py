@@ -11,7 +11,7 @@ import keyring.core
 
 class CommandLineTool(object):
     def __init__(self):
-        self.parser = OptionParser(usage="%prog [get|set] SERVICE USERNAME")
+        self.parser = OptionParser(usage="%prog [get|set|del] SERVICE USERNAME")
         self.parser.add_option("-p", "--keyring-path",
                                dest="keyring_path", default=None,
                                help="Path to the keyring backend")
@@ -60,8 +60,14 @@ class CommandLineTool(object):
             keyring.set_password(service, username, password)
             return 0
 
+        elif kid == 'del':
+            password = input_password("Deleting password for '%s' in '%s': " %
+                                      (username, service))
+            keyring.delete_password(service, username)
+            return 0
+
         else:
-            self.parser.error("You can only 'get' or 'set' a password.")
+            self.parser.error("You can only 'get', 'del' or 'set' a password.")
             pass
 
     def input_password(self, prompt):

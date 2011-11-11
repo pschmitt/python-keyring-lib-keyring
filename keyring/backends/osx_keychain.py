@@ -83,6 +83,7 @@ SecKeychainAddGenericPassword = CFUNCTYPE(OSStatus, SecKeychainRef, c_uint32, c_
                                           c_char_p, POINTER(SecKeychainItemRef))(('SecKeychainAddGenericPassword', _dll))
 SecKeychainItemModifyAttributesAndData = CFUNCTYPE(OSStatus, SecKeychainItemRef, c_void_p, c_uint32, c_void_p)(('SecKeychainItemModifyAttributesAndData', _dll))
 SecKeychainItemFreeContent = CFUNCTYPE(OSStatus, c_void_p, c_void_p)(('SecKeychainItemFreeContent', _dll))
+SecKeychainItemDelete = CFUNCTYPE(OSStatus, SecKeychainItemRef)(('SecKeychainItemDelete', _dll))
 
 def password_set(realmstring, username, password):
     if username is None:
@@ -134,3 +135,28 @@ def password_get(realmstring, username):
     finally:
         _core.CFRelease(keychain)
 
+def password_delete(realmstring, username):
+    if username is None:
+        username = ''
+
+    keychain = SecKeychainRef()
+    if SecKeychainOpen('login.keychain', byref(keychain)):
+        raise OSError("Can't access the login keychain")
+
+    try:
+        length = c_uint32()
+        data = c_void_p()
+        item = SecKeychainItemRef()
+        status = SecKeychainFindGenericPassword(keychain, len(realmstring), realmstring,
+                                                len(username), username,
+                                                byref(length), byref(data),
+                                                byref(item))
+        if status == 0:
+            SecKeychainItemDelete(item)
+            _core.CFRelease(item)
+        elif status == errSecItemNotFound:
+            password = None
+        else:
+            raise OSError("Can't delete password from system")
+    finally:
+        _core.CFRelease(keychain)
