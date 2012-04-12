@@ -21,26 +21,33 @@ except ImportError:
     import unittest
 
 import keyring.backend
-from keyring.backend import PasswordSetError
+
+from keyring.backend import PasswordSetError, PasswordDeleteError
 
 ALPHABET = string.ascii_letters + string.digits
 DIFFICULT_CHARS = string.whitespace + string.punctuation
 
+
 class ImportKiller(object):
     "Context manager to make an import of a given name or names fail."
+
     def __init__(self, *names):
         self.names = names
+
     def find_module(self, fullname, path=None):
         if fullname in self.names:
             return self
+
     def load_module(self, fullname):
         assert fullname in self.names
         raise ImportError(fullname)
+
     def __enter__(self):
         self.original = {}
         for name in self.names:
             self.original[name] = sys.modules.pop(name, None)
         sys.meta_path.append(self)
+
     def __exit__(self, *args):
         sys.meta_path.remove(self)
         for key, value in self.original.items():
@@ -83,7 +90,7 @@ def ImportBlesser(*names, **changes):
     return NoNoneDictMutator(sys.modules, **changes)
 
 
-def random_string(k, source = ALPHABET):
+def random_string(k, source=ALPHABET):
     """Generate a random string with length <i>k</i>
     """
     result = ''
@@ -101,14 +108,17 @@ def is_win32_crypto_supported():
         pass
     return False
 
+
 def is_osx_keychain_supported():
-    return sys.platform in ('mac','darwin')
+    return sys.platform in ('mac', 'darwin')
+
 
 def is_kwallet_supported():
     supported = keyring.backend.KDEKWallet().supported()
     if supported == -1:
         return False
     return True
+
 
 def is_crypto_supported():
     try:
@@ -118,11 +128,13 @@ def is_crypto_supported():
         return False
     return True
 
+
 def is_gnomekeyring_supported():
     supported = keyring.backend.GnomeKeyring().supported()
     if supported == -1:
         return False
     return True
+
 
 def is_qt4_supported():
     try:
@@ -130,6 +142,7 @@ def is_qt4_supported():
     except ImportError:
         return False
     return True
+
 
 def is_winvault_supported():
     try:
@@ -181,6 +194,20 @@ class BackendBasicTests(object):
         service = random_string(20, DIFFICULT_CHARS)
         self.check_set_get(service, username, password)
 
+    def test_delete_present(self):
+        password = random_string(20, DIFFICULT_CHARS)
+        username = random_string(20, DIFFICULT_CHARS)
+        service = random_string(20, DIFFICULT_CHARS)
+        keyring.set_password(service, username, password)
+        keyring.delete_password(service, username)
+        self.assertTrue(keyring.get_password(service, username) is None)
+
+    def test_delete_not_present(self):
+        username = random_string(20, DIFFICULT_CHARS)
+        service = random_string(20, DIFFICULT_CHARS)
+        self.assertRaises(PasswordDeleteError, keyring.delete_password,
+                          service, username)
+
     def test_different_user(self):
         """
         Issue #47 reports that WinVault isn't storing passwords for
@@ -198,6 +225,7 @@ class BackendBasicTests(object):
         self.set_password('service2', 'user3', 'password3')
         self.assertEqual(keyring.get_password('service1', 'user1'),
             'password1')
+
 
 @unittest.skipUnless(is_osx_keychain_supported(),
                      "Need OS X")
@@ -219,8 +247,9 @@ class GnomeKeyringTestCase(BackendBasicTests, unittest.TestCase):
     def init_keyring(self):
         k = keyring.backend.GnomeKeyring()
 
-        # Store passwords in the session (in-memory) keyring for the tests. This
-        # is going to be automatically cleared when the user logoff.
+        # Store passwords in the session (in-memory) keyring
+        # for the tests. This is going to be automatically cleared
+        # when the user logoff.
         k.KEYRING_NAME = 'session'
 
         return k
@@ -299,6 +328,7 @@ class FauxQtGui(object):
         def winId(self):
             pass
 
+
 class KDEWalletCanceledTestCase(unittest.TestCase):
 
     def test_user_canceled(self):
@@ -342,7 +372,7 @@ class FileKeyringTests(BackendBasicTests):
         try:
             os.unlink(self.tmp_keyring_file)
         except OSError, e:
-            if e.errno != 2: # No such file or directory
+            if e.errno != 2:  # No such file or directory
                 raise
 
     def test_encrypt_decrypt(self):
@@ -355,7 +385,6 @@ class FileKeyringTests(BackendBasicTests):
 
 
 class UncryptedFileKeyringTestCase(FileKeyringTests, unittest.TestCase):
-
 
     def init_keyring(self):
         return keyring.backend.UncryptedFileKeyring()

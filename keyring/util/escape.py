@@ -3,13 +3,13 @@ escape/unescape routines available for backends which need
 alphanumeric usernames, services, or other values
 """
 
-import string
 import re
+import string
 import sys
 
 LEGAL_CHARS = (
-    getattr(string, 'letters', None) # Python 2
-    or getattr(string, 'ascii_letters') # Python 3
+    getattr(string, 'letters', None)  # Python 2
+    or getattr(string, 'ascii_letters')  # Python 3
 ) + string.digits
 
 ESCAPE_FMT = "_%02X"

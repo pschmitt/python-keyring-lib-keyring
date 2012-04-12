@@ -9,6 +9,7 @@ import unittest
 
 from keyring.util import escape
 
+
 class EscapeTestCase(unittest.TestCase):
 
     def check_escape_unescape(self, initial):
