@@ -3,6 +3,20 @@ CHANGES
 =======
 
 ---
+0.9
+---
+
+* Add support for GTK 3 and secret service D-Bus. Fixes #52.
+* Issue #60 - Use correct method for decoding.
+
+-----
+0.8.1
+-----
+
+* Fix regression in keyring lib on Windows XP where the LOCALAPPDATA
+  environment variable is not present.
+
+---
 0.8
 ---
 
