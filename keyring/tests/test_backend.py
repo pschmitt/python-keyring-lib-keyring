@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 test_backend.py
 
@@ -30,6 +31,8 @@ from keyring.tests import mocks
 
 ALPHABET = string.ascii_letters + string.digits
 DIFFICULT_CHARS = string.whitespace + string.punctuation
+UNICODE_CHARS = u"""κόσμεНа берегу пустынных волнSîne klâwen durh die wolken sint
+geslagen, er stîget ûf mit grôzer kraft"""
 
 class ImportKiller(object):
     "Context manager to make an import of a given name or names fail."
@@ -217,6 +220,12 @@ class BackendBasicTests(object):
         service = random_string(20, DIFFICULT_CHARS)
         self.check_set_get(service, username, password)
 
+    def test_unicode_chars(self):
+        password = random_string(20, UNICODE_CHARS)
+        username = random_string(20, UNICODE_CHARS)
+        service = random_string(20, UNICODE_CHARS)
+        self.check_set_get(service, username, password)
+
     def test_different_user(self):
         """
         Issue #47 reports that WinVault isn't storing passwords for
@@ -291,7 +300,6 @@ class GnomeKeyringTestCase(BackendBasicTests, unittest.TestCase):
             environ['DBUS_SESSION_BUS_ADDRESS'] = None
             with Environ(**environ):
                 self.assertEqual(0, self.keyring.supported())
-
 
 @unittest.skipUnless(is_kwallet_supported(),
                      "Need KWallet")
