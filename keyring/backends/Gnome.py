@@ -22,6 +22,27 @@ class Keyring(KeyringBackend):
                 return 1
             else:
                 return 0
+    
+    def dump(self, print_passwords=False):
+        """Get all keyring entries (without passwords)
+        """
+        from gi.repository import GnomeKeyring
+        dump = ""
+        (result, ids) = GnomeKeyring.list_item_ids_sync(self.KEYRING_NAME)
+        for id in ids:	
+            (result, item) = GnomeKeyring.item_get_info_sync(self.KEYRING_NAME, id)
+            if result == GnomeKeyring.Result.IO_ERROR:
+                return None
+            if result == GnomeKeyring.Result.NO_MATCH:
+                return None
+            if result == GnomeKeyring.Result.CANCELLED:
+                # The user pressed "Cancel" when prompted to unlock their keyring.
+                return None
+            dump += item.get_display_name()
+            if print_passwords:
+                dump += " = " + item.get_secret()
+            dump += "\n"
+        return dump
 
     def get_password(self, service, username):
         """Get password of the username for the service
@@ -61,6 +82,7 @@ class Keyring(KeyringBackend):
         result = GnomeKeyring.item_create_sync(
             self.KEYRING_NAME, GnomeKeyring.ItemType.GENERIC_SECRET,
             "%s (%s)" % (service, username),
+
             attrs, password, True)[0]
         if result == GnomeKeyring.Result.CANCELLED:
             # The user pressed "Cancel" when prompted to unlock their keyring.
@@ -88,7 +110,6 @@ class Keyring(KeyringBackend):
         if result == GnomeKeyring.Result.CANCELLED:
             # The user pressed "Cancel" when prompted to unlock their keyring.
             raise PasswordSetError("Cancelled by user")
-
 
     def delete_password(self, service, username):
         """Delete the password for the username of the service.
