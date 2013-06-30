@@ -32,7 +32,7 @@ def get_keyring():
 def dump(print_passwords=False):
     """List all entries
     """
-    return _keyring_backend.dump()
+    return _keyring_backend.dump(print_passwords)
 
 def get_password(service_name, username):
     """Get password from the specified service.

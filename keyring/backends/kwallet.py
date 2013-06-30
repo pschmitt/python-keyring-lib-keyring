@@ -58,6 +58,13 @@ class Keyring(KeyringBackend):
             return 0
         else:
             return -1
+    
+    def dump(self, print_passwords=False)
+        """Get all keyring entries (with or without passwords)
+        """
+        # TODO: Implementation
+        print "To be implemented"
+        return None
 
     def get_password(self, service, username):
         """Get password of the username for the service
@@ -84,6 +91,13 @@ class Keyring(KeyringBackend):
             # the user pressed "cancel" when prompted to unlock their keyring.
             raise PasswordSetError("Cancelled by user")
         wallet.writePassword(username+'@'+service, password)
+
+    def set_password(self, service, username, password, url, notes):
+        """Set password for the username of the service
+        """
+        # TODO: Implementation
+        print "To be implemented"
+        return None 
 
     def delete_password(self, service, username):
         """Delete the password for the username of the service.

@@ -47,6 +47,20 @@ class Keyring(KeyringBackend):
         except:
             raise PasswordSetError("Can't store password in keychain")
 
+    def set_password(service, username, password, url, notes):
+        """Set password for the username of the service
+        """
+        # TODO: Implementation
+        print "To be implemented"
+        return None
+
+    def dump(self, print_passwords=False)
+        """Get all keyring entries (with or without passwords)
+        """
+        # TODO: Implementation
+        print "To be implemented"
+        return None
+
     @staticmethod
     def get_password(service, username):
         if username is None:

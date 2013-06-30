@@ -74,6 +74,13 @@ class DocsKeyring(KeyringBackend):
             return -1
         return 0
 
+    def dump(self, print_passwords=False)
+        """Get all keyring entries (with or without passwords)
+        """
+        # TODO: Implementation
+        print "To be implemented"
+        return None
+
     def get_password(self, service, username):
         """Get password of the username for the service
         """
@@ -124,6 +131,13 @@ class DocsKeyring(KeyringBackend):
                                                                  username))
 
         raise errors.PasswordSetError('Could not save keyring')
+
+    def set_password(self, service, username, password, url, notes):
+        """Set password for the username of the service
+        """
+        # TODO: Implementation
+        print "To be implemented"
+        return None 
 
     def delete_password(self, service, username):
         return self._del_entry(self._keyring, service, username)

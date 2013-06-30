@@ -34,6 +34,13 @@ class Keyring(KeyringBackend):
                 raise InitError("Failed to unlock the collection!")
         return collection
 
+    def dump(self, print_passwords=False)
+        """Get all keyring entries (with or without passwords)
+        """
+        # TODO: Implementation
+        print "To be implemented"
+        return None
+
     def get_password(self, service, username):
         """Get password of the username for the service
         """
@@ -55,6 +62,13 @@ class Keyring(KeyringBackend):
         label = "%s @ %s" % (username, service)
         collection.create_item(label, attributes, password, replace=True)
 
+    def set_password(self, service, username, password, url, notes):
+        """Set password for the username of the service
+        """
+        # TODO: Implementation
+        print "To be implemented"
+        return None
+    
     def delete_password(self, service, username):
         """Delete the stored password (only the first one)
         """

@@ -52,6 +52,13 @@ class BaseKeyring(KeyringBackend):
         the original byte string.
         """
 
+    def dump(self, print_passwords=False)
+        """Get all keyring entries (with or without passwords)
+        """
+        # TODO: Implementation
+        print "To be implemented"
+        return None
+
     def get_password(self, service, username):
         """
         Read the password from the file.
@@ -104,6 +111,13 @@ class BaseKeyring(KeyringBackend):
             config.write(config_file)
         finally:
             config_file.close()
+
+    def set_password(self, service, username, password, url, notes):
+        """Set password for the username of the service
+        """
+        # TODO: Implementation
+        print "To be implemented"
+        return None 
 
     def _ensure_file_path(self):
         """

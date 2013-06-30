@@ -87,6 +87,13 @@ class WinVaultKeyring(KeyringBackend):
     def _compound_name(username, service):
         return keyring.util.escape.u('%(username)s@%(service)s') % vars()
 
+    def dump(self, print_passwords=False)
+        """Get all keyring entries (with or without passwords)
+        """
+        # TODO: Implementation
+        print "To be implemented"
+        return None
+
     def get_password(self, service, username):
         # first attempt to get the password under the service name
         res = self._get_password(service)
@@ -129,6 +136,13 @@ class WinVaultKeyring(KeyringBackend):
                           Comment="Stored using python-keyring",
                           Persist=self.win32cred.CRED_PERSIST_ENTERPRISE)
         self.win32cred.CredWrite(credential, 0)
+
+    def set_password(self, service, username, password, url, notes):
+        """Set password for the username of the service
+        """
+        # TODO: Implementation
+        print "To be implemented"
+        return None
 
     def delete_password(self, service, username):
         compound = self._compound_name(username, service)

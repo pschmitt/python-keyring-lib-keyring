@@ -22,6 +22,13 @@ class MultipartKeyringWrapper(KeyringBackend):
         """
         return self._keyring.supported()
 
+    def dump(self, print_passwords=False)
+        """Get all keyring entries (with or without passwords)
+        """
+        # TODO: Implementation
+        print "To be implemented"
+        return None
+
     def get_password(self, service, username):
         """Get password of the username for the service
         """
@@ -53,6 +60,13 @@ class MultipartKeyringWrapper(KeyringBackend):
             if i > 0:
                 curr_username += '{{part_%d}}' %i
             self._keyring.set_password(service, curr_username, password_part)
+
+    def set_password(self, service, username, password, url, notes):
+        """Set password for the username of the service
+        """
+        # TODO: Implementation
+        print "To be implemented"
+        return None
 
     def delete_password(self, service, username):
         self._keyring.delete_password(service, username)

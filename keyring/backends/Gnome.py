@@ -24,7 +24,7 @@ class Keyring(KeyringBackend):
                 return 0
     
     def dump(self, print_passwords=False):
-        """Get all keyring entries (without passwords)
+        """Get all keyring entries (with or without passwords)
         """
         from gi.repository import GnomeKeyring
         dump = ""
