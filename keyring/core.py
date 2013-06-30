@@ -41,6 +41,10 @@ def set_password(service_name, username, password):
     """
     _keyring_backend.set_password(service_name, username, password)
 
+def set_password(service_name, username, password, url, notes):
+    """Set password for the user in the specified service. (Gnome keyring only at the moment)
+    """
+    _keyring_backend.set_password(service_name, username, password, url, notes)
 
 def delete_password(service_name, username):
     """Delete the password for the user in the specified service.
