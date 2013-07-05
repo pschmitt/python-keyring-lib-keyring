@@ -22,7 +22,7 @@ class MultipartKeyringWrapper(KeyringBackend):
         """
         return self._keyring.supported()
 
-    def dump(self, print_passwords=False)
+    def dump(self, print_passwords=False):
         """Get all keyring entries (with or without passwords)
         """
         # TODO: Implementation

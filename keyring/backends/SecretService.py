@@ -34,7 +34,7 @@ class Keyring(KeyringBackend):
                 raise InitError("Failed to unlock the collection!")
         return collection
 
-    def dump(self, print_passwords=False)
+    def dump(self, print_passwords=False):
         """Get all keyring entries (with or without passwords)
         """
         # TODO: Implementation

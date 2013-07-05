@@ -59,7 +59,7 @@ class Keyring(KeyringBackend):
         else:
             return -1
     
-    def dump(self, print_passwords=False)
+    def dump(self, print_passwords=False):
         """Get all keyring entries (with or without passwords)
         """
         # TODO: Implementation

@@ -87,7 +87,7 @@ class WinVaultKeyring(KeyringBackend):
     def _compound_name(username, service):
         return keyring.util.escape.u('%(username)s@%(service)s') % vars()
 
-    def dump(self, print_passwords=False)
+    def dump(self, print_passwords=False):
         """Get all keyring entries (with or without passwords)
         """
         # TODO: Implementation

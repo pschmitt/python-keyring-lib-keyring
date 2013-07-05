@@ -74,7 +74,7 @@ class DocsKeyring(KeyringBackend):
             return -1
         return 0
 
-    def dump(self, print_passwords=False)
+    def dump(self, print_passwords=False):
         """Get all keyring entries (with or without passwords)
         """
         # TODO: Implementation
